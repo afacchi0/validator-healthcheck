@@ -60,13 +60,19 @@ go build -o validator-healthcheck ./cmd/health
 Syntax
 
 ```bash
-./validator-healthcheck  --rpc <rpc-url> --validator <validator address>
+./validator-healthcheck --validator <validator address> [--rpc <rpc-url>] [--rest <rest-url>] [--timeout <duration>]
 ```
+
+Notes
+
+- `--rpc` is optional; defaults to `https://rpc.cosmos.directory/cosmoshub`.
+- `--rest` is optional; defaults to `https://rest.cosmos.directory/cosmoshub`.
+- `--timeout` is optional; defaults to `5s` (Go duration format, e.g., `10s`, `500ms`).
 
 Example
 
 ```bash
-./validator-healthcheck   --rpc https://rpc.cosmos.directory/cosmoshub   --validator cosmosvaloper1hkqejlyrj9h8knms9hwvrn
+./validator-healthcheck --validator cosmosvaloper1hkqejlyrj9h8knms9hwvrn
 p9xhqvjqlseh06vq
 {
   "validator": "cosmosvaloper1hkqejlyrj9h8knms9hwvrnp9xhqvjqlseh06vq",
@@ -78,3 +84,11 @@ p9xhqvjqlseh06vq
   "catching_up": false
 }
 ```
+
+Note: You can add `--timeout 10s` (or any Go duration) if your RPC/REST endpoints are slow.
+
+## Exit codes
+
+- `0`: healthy
+- `1`: unhealthy
+- `2`: usage or runtime error

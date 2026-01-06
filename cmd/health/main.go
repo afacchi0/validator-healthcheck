@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"time"
 
 	"validator-healthcheck/internal/health"
 	"validator-healthcheck/internal/rpc"
@@ -17,10 +18,34 @@ func main() {
 		"Tendermint RPC endpoint",
 	)
 
+	restURL := flag.String(
+		"rest",
+		"https://rest.cosmos.directory/cosmoshub",
+		"Cosmos REST API endpoint",
+	)
+
+	timeout := flag.Duration(
+		"timeout",
+		5*time.Second,
+		"HTTP timeout for RPC and REST requests",
+	)
+
 	validator := flag.String(
 		"validator",
 		"",
 		"Validator operator address (cosmosvaloper...)",
+	)
+
+	outputJSON := flag.Bool(
+		"json",
+		false,
+		"Emit compact JSON output",
+	)
+
+	outputPretty := flag.Bool(
+		"pretty",
+		false,
+		"Emit pretty-printed JSON output",
 	)
 
 	flag.Parse()
@@ -31,7 +56,7 @@ func main() {
 	}
 
 	// Tendermint RPC (node status)
-	client := rpc.New(*rpcURL)
+	client := rpc.NewWithTimeout(*rpcURL, *timeout)
 
 	status, err := client.Status()
 	if err != nil {
@@ -40,7 +65,7 @@ func main() {
 	}
 
 	// Cosmos REST (validator state)
-	cosmos := rpc.NewCosmos("https://rest.cosmos.directory/cosmoshub")
+	cosmos := rpc.NewCosmosWithTimeout(*restURL, *timeout)
 
 	v, err := cosmos.Validator(*validator)
 	if err != nil {
@@ -74,8 +99,19 @@ func main() {
 	report.Healthy = len(report.Issues) == 0
 
 	// Emit JSON
+	if *outputJSON && *outputPretty {
+		fmt.Fprintln(os.Stderr, "--json and --pretty are mutually exclusive")
+		os.Exit(2)
+	}
+
 	enc := json.NewEncoder(os.Stdout)
-	enc.SetIndent("", "  ")
+	pretty := *outputPretty
+	if !pretty && !*outputJSON {
+		pretty = true
+	}
+	if pretty {
+		enc.SetIndent("", "  ")
+	}
 
 	if err := enc.Encode(report); err != nil {
 		fmt.Fprintln(os.Stderr, err)

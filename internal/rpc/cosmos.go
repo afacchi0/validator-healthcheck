@@ -30,6 +30,15 @@ func NewCosmos(baseURL string) *CosmosClient {
 	}
 }
 
+func NewCosmosWithTimeout(baseURL string, timeout time.Duration) *CosmosClient {
+	return &CosmosClient{
+		baseURL: baseURL,
+		client: &http.Client{
+			Timeout: timeout,
+		},
+	}
+}
+
 func (c *CosmosClient) Validator(valoper string) (*StakingValidatorResponse, error) {
 	url := fmt.Sprintf(
 		"%s/cosmos/staking/v1beta1/validators/%s",

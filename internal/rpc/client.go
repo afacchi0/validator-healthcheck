@@ -43,6 +43,15 @@ func New(baseURL string) *Client {
 	}
 }
 
+func NewWithTimeout(baseURL string, timeout time.Duration) *Client {
+	return &Client{
+		baseURL: baseURL,
+		client: &http.Client{
+			Timeout: timeout,
+		},
+	}
+}
+
 func (c *Client) Status() (*StatusResponse, error) {
 	url := fmt.Sprintf("%s/status", c.baseURL)
 
