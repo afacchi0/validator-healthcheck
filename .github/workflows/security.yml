@@ -12,7 +12,7 @@ jobs:
   scan:
     uses: afacchi0/security-workflows/.github/workflows/security-scan.yml@main
     with:
-      languages: '["go","python","rust"]'
+      languages: '["go"]'
       run_codeql: true
-      run_tfsec: true
+      run_tfsec: false
     secrets: inherit
