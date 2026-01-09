@@ -14,5 +14,4 @@ jobs:
     with:
       languages: '["go"]'
       run_codeql: true
-      run_tfsec: false
     secrets: inherit
